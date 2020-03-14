@@ -73,7 +73,6 @@ function obj:new()
   self.sprites = {}
   self.spritei = 1
   self.spritedelay = nil
-  self.spritesize = 1
   return self
 end
 
@@ -101,7 +100,7 @@ end
 
 function obj:draw()
   assert(#self.sprites > 0)
-  spr(self.sprites[self.spritei],self.x+cam.ox,self.y+cam.oy,self.spritesize,self.spritesize, self.flipx or false)
+  spr(self.sprites[self.spritei],self.x+cam.ox,self.y+cam.oy,self.w/8,self.h/8, self.flipx or false)
 end
 -->8
 -- road
@@ -130,7 +129,6 @@ function salt:new()
   self.h = 16
   self.sprites = {10, 12, 14}
   self.spritedelay = 5
-  self.spritesize = 2
   return self
 end
 
@@ -141,7 +139,8 @@ pl = obj:new()
 pl.speed = 2
 pl.sprites = {7, 39}
 pl.spritedelay = 8
-pl.spritesize = 2
+pl.w = 16
+pl.h = 16
 pl.width = 16
 pl.height = 16
 
@@ -182,16 +181,17 @@ function snail:new()
   local self = obj.new(self)
     self.x = cam.x + 64
     self.y = (flr(rnd(7))+1)*16
+    self.w = 16
+    self.h = 16
     self.speed = flr(rnd(2))+1
     self.sprites = {36}
-    self.spritesize = 2
     self.flipx = true
   return self
 end
 
 function snail:update()
   self.x = self.x - self.speed
-  if self.x + cam.ox + 8 < 0
+  if self.x + self.w + cam.ox < 0
     or self.x + cam.ox > 128
   then
     add(world, snail:new())
