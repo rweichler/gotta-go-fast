@@ -70,27 +70,38 @@ function obj:new()
   self.y = 0
   self.w = 8
   self.h = 8
-  self.sprite = 0
-  self.sprite_size = 1
+  self.sprites = {}
+  self.spritei = 1
+  self.spritedelay = nil
+  self.spritesize = 1
   return self
 end
 
 function obj:update()
-  if self:iscolliding(pl) then
-    return false
+  if #self.sprites > 1 then
+    self.spritettl = (self.spritettl or self.spritedelay) - 1
+    if self.spritettl == 0 then
+      self.spritettl = nil
+      self.spritei = self.spritei + 1
+      if self.spritei > #self.sprites then
+        self.spritei = 1
+      end
+    end
   end
-  return true
+  return not self:iscolliding(pl)
 end
 
 function obj:iscolliding(o)
-  return self.x < o.x + o.w
+  return self ~= o
+     and self.x < o.x + o.w
      and self.x + self.w > o.x
      and self.y < o.y + o.h
      and self.y + self.h > o.y
 end
 
 function obj:draw()
-  spr(self.sprite,self.x+cam.ox,self.y+cam.oy,self.sprite_size,self.sprite_size, self.flipx or false)
+  assert(#self.sprites > 0)
+  spr(self.sprites[self.spritei],self.x+cam.ox,self.y+cam.oy,self.spritesize,self.spritesize, self.flipx or false)
 end
 -->8
 -- road
@@ -117,32 +128,22 @@ function salt:new()
   self.sprite = 10
   self.w = 16
   self.h = 16
-  self.sprite_size = 2
-  self.ttl = 0
+  self.sprites = {10, 12, 14}
+  self.spritedelay = 5
+  self.spritesize = 2
   return self
 end
 
-function salt:update()
-  self.ttl = self.ttl + 1
-  if self.ttl == 5 then
-    self.sprite = self.sprite + 2
-    if self.sprite > 14 then
-      self.sprite = 10
-    end
-    self.ttl = 0
-  end
-  return obj.update(self)
-end
 -->8
 -- player
 
 pl = obj:new()
 pl.speed = 2
-pl.sprite = 7
-pl.sprite_size = 2
+pl.sprites = {7, 39}
+pl.spritedelay = 8
+pl.spritesize = 2
 pl.width = 16
 pl.height = 16
-pl.ttl = 0
 
 function pl:update()
   local dx,dy = 0,0
@@ -171,25 +172,19 @@ function pl:update()
   self.y = min(self.y, 128 - 8)
   self.y = max(self.y, 0)
 
-  self.ttl = self.ttl + 1
-  if self.ttl == 8 then
-    self.sprite = self.sprite + 32
-    if self.sprite > 64 then
-      self.sprite = 7
-    end
-    self.ttl = 0
-  end
+  return obj.update(self)
 end
 -->8
 -- snail
+
 snail = obj:new()
 function snail:new()
   local self = obj.new(self)
     self.x = cam.x + 64
     self.y = (flr(rnd(7))+1)*16
     self.speed = flr(rnd(2))+1
-    self.sprite = 36
-    self.sprite_size = 2
+    self.sprites = {36}
+    self.spritesize = 2
     self.flipx = true
   return self
 end
