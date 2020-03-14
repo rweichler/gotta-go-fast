@@ -1,6 +1,11 @@
 pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
+conf = {}
+-- locks camera and prevents player from
+-- roaming past the top/bottom of screen
+conf.lock_y = true
+
 function _init()
   world = {}
   for i=1,100 do
@@ -57,7 +62,9 @@ function cam.update()
   end
   
   cam.ox = 64 - cam.x
-  --cam.oy = 64 - cam.y
+  if not conf.lock_y then
+   cam.oy = 64 - cam.y
+  end
 end
 -->8
 -- obj
@@ -168,8 +175,10 @@ function pl:update()
   self.x = self.x + dx*self.speed
   self.y = self.y + dy*self.speed
   
-  self.y = min(self.y, 128 - 8)
-  self.y = max(self.y, 0)
+  if conf.lock_y then
+    self.y = min(self.y, 128 - 8)
+    self.y = max(self.y, 0)
+  end
 
   return obj.update(self)
 end
